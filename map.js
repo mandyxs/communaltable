@@ -23,7 +23,7 @@ var infoWindowContent = '<div id="infowindow">' +
 
 
 
-var map, infoWindow;
+var map, infoWindow, geocoder, loc;
 
 function initMap() {
 
@@ -127,13 +127,24 @@ function initMap() {
       };
 
   var nq = {lat: 42.280926, lng: -83.739721};
+  var aalib = {lat: 42.278421, lng: -83.746221 }
   map = new google.maps.Map(document.getElementById('map'), {
     center: nq,
     zoom: 14,
     styles: styles['silver']
   });
 
-  infoWindow = new google.maps.InfoWindow;
+  geocoder = new google.maps.Geocoder();
+
+  geocoder.geocode( { 'address': sampleEvent.addr}, function(results, status) {
+      if (status == 'OK') {
+        loc = results[0].geometry.location;
+        console.log(loc);
+      } else {
+        alert('Geocode was not successful for the following reason: ' + status);
+      }
+    });
+
   // Try HTML5 geolocation.
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
@@ -142,9 +153,6 @@ function initMap() {
         lng: position.coords.longitude
       };
 
-      infoWindow.setPosition(pos);
-      infoWindow.setContent('You are here');
-      //infoWindow.open(map);
       map.setCenter(pos);
 
       var marker = new google.maps.Marker({
@@ -164,7 +172,7 @@ function initMap() {
 
   //add markers to events
 
-  var eventMarker1 = new google.maps.Marker({position: sampleEvent['pos'], map: map});
+  var eventMarker1 = new google.maps.Marker({position: sampleEvent.pos, map: map});
 
   var eventWindow1 = new google.maps.InfoWindow({
     content: infoWindowContent,
@@ -179,14 +187,14 @@ function initMap() {
   eventMarker1.addListener('click', function() {
     map.panTo(eventMarker1.getPosition());
     
-    $( "#eventName" ).html("Updated");
+    $( "#eventName" ).html(sampleEvent.name);
 
     $( ".sidebar" ).animate({
       left: "0px",
     }, 500 );
   });
 
-  var eventMarker2 = new google.maps.Marker({position: nq, map: map});
+  var eventMarker2 = new google.maps.Marker({position: aalib, map: map});
 
 
   eventMarker2.addListener('mouseover', function() {
@@ -196,7 +204,7 @@ function initMap() {
   eventMarker2.addListener('click', function() {
     map.panTo(eventMarker2.getPosition());
     
-    $( "#eventName" ).html("Updated");
+    $( "#eventName" ).html(sampleEvent.name);
 
     $( ".sidebar" ).animate({
       left: "0px",
@@ -208,7 +216,7 @@ function initMap() {
     event.preventDefault();
     map.panTo(eventWindow1.getPosition());
 
-    $( "#eventName" ).html("Updated");
+    $( "#eventName" ).html(sampleEvent.name);
 
     $( ".sidebar" ).animate({
       left: "0px",
